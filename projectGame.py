@@ -28,12 +28,12 @@ glOrtho(0, width, height, 0, -1, 1)
 
 # Karakter
 bird_size = 30
-bird_x = width // 4   
+bird_x = width // 4  # 
 bird_y = height // 2
 bird_speed = 4
 
 # Pipa
-pipe_width = 50
+pipe_width = 45
 pipe_height = random.randint(50, height - 100)
 pipe_x = width
 pipe_speed = 4
@@ -55,12 +55,14 @@ isi_nyawa = 0
 
 # images
 mainmenu_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/FlyP per.png")
-bg = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/3crop.jpg")
+bg = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/main.jpg")
 ground = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/ground.png")
 koin = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/koin50.png")
 pause = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/pause.png")
 PaperPlane = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/pesawat.png")
-pohon = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/1.png")
+gameover_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/Gameover.png")
+Halangan_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/halangan.png")
+
 
 ground_scroll = 0
 ground_scroll_x2 = 600
@@ -170,6 +172,12 @@ def draw_text(text, x, y):
     render_text = font.render(text, True, (255, 255, 255))
     pygame.display.get_surface().blit(render_text, (x, y))
 
+def game_over():
+    game_state = game_over
+    screen.blit(gameover_pict,(0,0))
+    gameover = True
+
+
 def resetgame():
     global bird_x, bird_y, pipe_x, pipe_height, food_x, food_y, bird_speed, pipe_speed, lives
     bird_x = width // 4
@@ -192,6 +200,9 @@ run = True
 show_menu = True
 paused = False
 
+# game_state = main_menu
+
+
 while run:
     # Set frame rate
     
@@ -207,7 +218,7 @@ while run:
         if event.type == pygame.QUIT: 
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN and show_menu == True:
-            if is_button_clicked(event.pos[0], event.pos[1], 240, 266, 360, 294):
+            if is_button_clicked(event.pos[0], event.pos[1], 240, 266, 360, 294) and game_state == main_menu:
                 pygame.quit()
                 quit()
                 
@@ -217,8 +228,8 @@ while run:
                 bgsound.set_volume(volume)
                 bgsound.play()
                 fly = True
-            elif is_button_clicked(event.pos[0], event.pos[1], 240, 204, 360, 234):
-                print("oyeeeee")
+            # elif is_button_clicked(event.pos[0], event.pos[1], 240, 204, 360, 234):
+            #     print("oyeeeee")
             
     
     if fly == True:
@@ -244,12 +255,20 @@ while run:
                         #     print("oyeeeee")
                             # show_menu = False  # Klik tombol "Start", jadi sembunyikan menu
         
+        # if keys[pygame.K_p]:
+        #     paused = not paused
+        #     screen.blit(pause,(0,0))
+
+        
         if keys[pygame.K_SPACE] and not paused:
             bird_y -= bird_speed
 
         else:
             bird_y = max(0, bird_y + bird_speed)
         
+        bird_y = min(height - bird_size, bird_y)
+        bird_y = max(0, bird_y)
+
     # background
         ground_scroll -= scroll_speed
         ground_scroll_x2 -= scroll_speed
@@ -260,27 +279,19 @@ while run:
             ground_scroll_x2 = 600
 
         screen.blit(bg,(0,0))
-        screen.blit(ground,(ground_scroll, 50))
-        screen.blit(ground,(ground_scroll_x2, 50))
+        screen.blit(ground,(ground_scroll, 75))
+        screen.blit(ground,(ground_scroll_x2, 75))
+        screen.blit(PaperPlane,(bird_x,bird_y))
+        screen.blit(koin,(food_x, food_y))
+        pipe = pipe_height + pipe_gap
+        p1 = 350 - pipe_height
 
+        screen.blit(Halangan_pict,(pipe_x, pipe))
+        # screen.blit(Halangan_pict,(pipe_x, p1))
+        screen.blit(Halangan_pict,(pipe_x, -p1))
         pygame.time.wait(10)
 
 # Batasi agar burung tidak melewati batas bawah layar
-        bird_y = min(height - bird_size, bird_y)
-
-        pipe_x -= pipe_speed
-        if pipe_x < -pipe_width:
-            pipe_x = width
-            pipe_height = random.randint(50, height - 100)  
-            score += 1
-            if score % 10 == 0:
-                bird_speed += 2
-                pipe_speed += 2
-            
-        screen.blit(PaperPlane,(bird_x,bird_y))
-        screen.blit(koin,(food_x, food_y))
-        screen.blit(pohon,(pipe_x, pipe_height))
-
 
         food_x -= food_speed
         if food_x < -food_size:
@@ -293,6 +304,7 @@ while run:
             and bird_y < food_y + food_size
             and bird_y + bird_size > food_y
         ):
+            jump_s.play()
             # Burung memakan makanan
             food_x = width + 100  # Geser makanan ke luar layar
             food_y = random.randint(50, height - 50)
@@ -308,6 +320,15 @@ while run:
                 bird_speed += 1
                 pipe_speed += 1
 
+        pipe_x -= pipe_speed
+        if pipe_x < -pipe_width:
+            pipe_x = width
+            pipe_height = random.randint(50, height - 100)  
+            score += 1
+            if score % 10 == 0:
+                bird_speed += 2
+                pipe_speed += 2
+
         # Deteksi tabrakan dengan pipa
         if bird_x < pipe_x + pipe_width and bird_x + bird_size > pipe_x:
             if bird_y < pipe_height or bird_y + bird_size > pipe_height + pipe_gap:
@@ -321,7 +342,8 @@ while run:
                 if lives == 0:
                     print(f"Game Over. Skor Anda: {score}")
                     fly = False
-                    show_menu = True
+                    game_over()
+
                 resetgame()
             
     glClear(GL_COLOR_BUFFER_BIT)
@@ -338,7 +360,7 @@ while run:
     # draw_ground()
     draw_background()
 
-    draw_pipe()
+    # draw_pipe()
     glDisable(GL_TEXTURE_2D)
 
     pygame.display.flip()
