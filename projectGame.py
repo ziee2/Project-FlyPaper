@@ -1,49 +1,46 @@
 import pygame
-import sys
-import math
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import random
 
-# Inisialisasi Pygame
+# Inisialisasi
 pygame.init()
-
 pygame.mixer.init()
-
 width, height = 600, 400
 pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)
 screen = pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)
-pygame.display.set_caption("Pesawat kertas")
+pygame.display.set_caption("FlyPaper")
+glOrtho(0, width, height, 0, -1, 1)  
 
 #sound
 bgsound = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/Intrumen Kebunbinatang.mp3")
-
-jump_s = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/Jump_s.mp3")
+coins_s = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/sfx_coins.mp3")
+sfx_gameover = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/sfx_gameover.mp3")
+sfx_buttuon = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/sfx_button.mp3")
+sfx_start = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/sfx_start.mp3")
+sfx_crash = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/sfx_crash.mp3")
 
 # Inisialisasi OpenGL
-glOrtho(0, width, height, 0, -1, 1)         
-# glOrtho(0, width, 0, height, -1, 1)
-
 
 # Karakter
-bird_size = 30
-bird_x = width // 4  # 
-bird_y = height // 2
-bird_speed = 4
+flypaper_size = 25
+flypaper_x = 150
+flypaper_y = 200 
+flypaper_speed = 4
 
 # Pipa
-pipe_width = 45
-pipe_height = random.randint(50, height - 100)
-pipe_x = width
-pipe_speed = 4
-pipe_gap = 100
+halangan_width = 40
+halangan_height = random.randint(50, height - 100)
+halangan_x = width
+halangan_speed = 4
+halangan_gap = 110
 
 # food
-food_size = 50
-food_x = random.randint(100, width - 100)
-food_y = random.randint(50, height - 50)
-food_speed = 2
+koin_size = 50
+koin_x = random.randint(100, width - 100)
+koin_y = random.randint(50, height - 50)
+koin_speed = 2
 
 # Skor
 score = 0
@@ -54,14 +51,14 @@ lives = 2
 isi_nyawa = 0
 
 # images
-mainmenu_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/FlyP per.png")
-bg = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/main.jpg")
+mainmenu_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/mainmenu.png")
+bg = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/background.jpg")
 ground = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/ground.png")
-koin = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/koin50.png")
-pause = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/pause.png")
-PaperPlane = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/pesawat.png")
+koin = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/koin.png")
+PaperPlane = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/char.png")
 gameover_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/Gameover.png")
-Halangan_pict = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/halangan.png")
+Halangan_bawah = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/halangan1.png")
+Halangan_atas = pygame.image.load("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/img/halangan-1.png")
 
 
 ground_scroll = 0
@@ -91,6 +88,75 @@ def button_MM():
     glPopMatrix()
     
 
+def draw_background():
+    glBegin(GL_QUADS)
+    glTexCoord(0, 0)
+    glVertex2f(0, 0)
+    glTexCoord(1 , 0)
+    glVertex2f(width, 0)
+    glTexCoord(1, 1)
+    glVertex2f(width, height)
+    glTexCoord(0, 1)
+    glVertex2f(0, height)
+    glEnd()
+
+def draw_ground():
+    glBegin(GL_QUADS)
+    glTexCoord(0, 1) 
+    glVertex2f(0, -50)
+    glTexCoord(1, 1) 
+    glVertex2f(0, 120)
+    glTexCoord(1, 0)  
+    glVertex2f(600, 120)
+    glTexCoord(0, 0)
+    glVertex2f(600, -50)
+    glEnd()
+
+def draw_koin():
+    glBegin(GL_QUADS)
+    glTexCoord(0, 1)
+    glVertex2f(koin_x, koin_y)
+    glTexCoord(1, 1)
+    glVertex2f(koin_x + koin_size, koin_y)
+    glTexCoord(1, 0)
+    glVertex2f(koin_x + koin_size, koin_y + koin_size)
+    glTexCoord(0, 0)
+    glVertex2f(koin_x, koin_y +  koin_size)             
+    glEnd()
+
+def draw_flypaper():
+    glBegin(GL_QUADS)
+    glVertex2f(flypaper_x, flypaper_y)
+    glVertex2f(flypaper_x + flypaper_size, flypaper_y)
+    glVertex2f(flypaper_x + flypaper_size, flypaper_y + flypaper_size)
+    glVertex2f(flypaper_x, flypaper_y + flypaper_size)
+    glEnd()
+
+def draw_halangan():
+    glBegin(GL_QUADS)
+    glVertex2f(halangan_x, 0)
+    glVertex2f(halangan_x + halangan_width, 0)
+    glVertex2f(halangan_x + halangan_width, halangan_height)
+    glVertex2f(halangan_x, halangan_height)
+    
+    glVertex2f(halangan_x, halangan_height + halangan_gap)
+    glVertex2f(halangan_x + halangan_width, halangan_height + halangan_gap)
+    glVertex2f(halangan_x + halangan_width, height)
+    glVertex2f(halangan_x, height)
+    glEnd()
+
+def draw_text(text, x, y): 
+    render_text = font.render(text, True, (255, 255, 255))
+    pygame.display.get_surface().blit(render_text, (x, y))
+
+def game_over():
+    sfx_gameover.play()
+    global collision, game_state
+    if gameover:
+        collision = True
+        game_state = "game_over"
+        screen.blit(gameover_pict,(0,0))
+
 def is_button_clicked(x, y, button_x, button_y, button_width, button_height):
     return (
         x >= button_x and
@@ -99,117 +165,32 @@ def is_button_clicked(x, y, button_x, button_y, button_width, button_height):
         y <= button_height
     )
 
-
-def draw_background():
-    glBegin(GL_QUADS)
-    glTexCoord(0, 0)
-    glVertex2f(0, 0)
-
-    glTexCoord(1 , 0)
-    glVertex2f(width, 0)
-
-    glTexCoord(1, 1)
-    glVertex2f(width, height)
-
-    glTexCoord(0, 1)
-    glVertex2f(0, height)
-    glEnd()
-
-def draw_ground():
-    glBegin(GL_QUADS)
-    glTexCoord(0, 1)  # Sudut kiri bawah
-    glVertex2f(0, -50)
-
-    glTexCoord(1, 1)  # Sudut kiri atas
-    glVertex2f(0, 120)
-
-    glTexCoord(1, 0)  # Sudut kanan atas
-    glVertex2f(600, 120)
-
-    glTexCoord(0, 0)  # Sudut kanan bawah
-    glVertex2f(600, -50)
-    glEnd()
-
-
-def draw_food():
-    glBegin(GL_QUADS)
-    glTexCoord(0, 1)
-    glVertex2f(food_x, food_y)
-
-    glTexCoord(1, 1)
-    glVertex2f(food_x + food_size, food_y)
-
-    glTexCoord(1, 0)
-    glVertex2f(food_x + food_size, food_y + food_size)
-
-    glTexCoord(0, 0)
-    glVertex2f(food_x, food_y +  food_size)             
-    glEnd()
-
-
-def draw_bird():
-    glBegin(GL_QUADS)
-    glVertex2f(bird_x, bird_y)
-    glVertex2f(bird_x + bird_size, bird_y)
-    glVertex2f(bird_x + bird_size, bird_y + bird_size)
-    glVertex2f(bird_x, bird_y + bird_size)
-    glEnd()
-
-def draw_pipe():
-    glBegin(GL_QUADS)
-    glVertex2f(pipe_x, 0)
-    glVertex2f(pipe_x + pipe_width, 0)
-    glVertex2f(pipe_x + pipe_width, pipe_height)
-    glVertex2f(pipe_x, pipe_height)
-    
-    glVertex2f(pipe_x, pipe_height + pipe_gap)
-    glVertex2f(pipe_x + pipe_width, pipe_height + pipe_gap)
-    glVertex2f(pipe_x + pipe_width, height)
-    glVertex2f(pipe_x, height)
-    glEnd()
-
-def draw_text(text, x, y): 
-    render_text = font.render(text, True, (255, 255, 255))
-    pygame.display.get_surface().blit(render_text, (x, y))
-
-def game_over():
-    game_state = game_over
-    screen.blit(gameover_pict,(0,0))
-    gameover = True
-
-
 def resetgame():
-    global bird_x, bird_y, pipe_x, pipe_height, food_x, food_y, bird_speed, pipe_speed, lives
-    bird_x = width // 4
-    bird_y = height // 2 
-    # Atur ulang posisi pipa 
-    pipe_x = width
-    pipe_height = random.randint(50, height - 100) 
-    # Tambahan: Atur ulang posisi makanan jika ada
-    food_x = width + 100 
-    food_y = random.randint(50, height - 50)
+    global flypaper_x, flypaper_y, halangan_x, halangan_height, koin_x, koin_y, flypaper_speed, halangan_speed, lives
+    flypaper_x = width // 4
+    flypaper_y = height // 2 
+    halangan_x = width
+    halangan_height = random.randint(50, height - 100) 
+    koin_x = width + 100 
+    koin_y = random.randint(50, height - 50)
     if lives == 0:
         lives = 2
         isi_nyawa = 0
 
 clock = pygame.time.Clock()
 
-# bgsound.play()
 fly = False
 run = True
-show_menu = True
+collision = True
 paused = False
-
-# game_state = main_menu
-
+menu = True
+game_state = "main_menu"
 
 while run:
-    # Set frame rate
-    
     clock.tick(60)
-
-    if show_menu:
-        menu = True
+    if menu:
+        collision = True
+        game_state = "main_menu"
         screen.blit(mainmenu_pict,(0,0))
 
     keys = pygame.key.get_pressed()
@@ -217,59 +198,49 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: 
             run = False
-        if event.type == pygame.MOUSEBUTTONDOWN and show_menu == True:
-            if is_button_clicked(event.pos[0], event.pos[1], 240, 266, 360, 294) and game_state == main_menu:
-                pygame.quit()
-                quit()
+        if event.type == pygame.MOUSEBUTTONDOWN and collision == True:
+            if is_button_clicked(event.pos[0], event.pos[1], 240, 266, 360, 294):
+                sfx_buttuon.play()
+                if game_state == "game_over":
+                    gameover = False
+                    menu = True
                 
-            elif is_button_clicked(event.pos[0], event.pos[1], 240, 140, 360, 170):
-                show_menu = False  # Klik tombol "Start", jadi sembunyikan menu
-                volume = 0.2  # Ini akan mengatur volume ke 50%
-                bgsound.set_volume(volume)
-                bgsound.play()
-                fly = True
-            # elif is_button_clicked(event.pos[0], event.pos[1], 240, 204, 360, 234):
-            #     print("oyeeeee")
-            
-    
-    if fly == True:
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                paused = not paused
-                if paused:
-                    pygame.mixer.pause()
-                    screen.blit(pause,(0,0))
-                    
-                    if event.type == pygame.MOUSEBUTTONDOWN and show_menu == True:
-                        if is_button_clicked(event.pos[0], event.pos[1], 240, 266, 360, 294):
-                            pygame.quit()
-                            quit()
-                            
-                        elif is_button_clicked(event.pos[0], event.pos[1], 240, 140, 360, 170):
-                            show_menu = False  # Klik tombol "Start", jadi sembunyikan menu
-                            volume = 0.2  # Ini akan mengatur volume ke 50%
-                            # bgsound.set_volume(volume)
-                            # bgsound.play()
-                            fly = True
-                        # elif is_button_clicked(event.pos[0], event.pos[1], 240, 204, 360, 234):
-                        #     print("oyeeeee")
-                            # show_menu = False  # Klik tombol "Start", jadi sembunyikan menu
-        
-        # if keys[pygame.K_p]:
-        #     paused = not paused
-        #     screen.blit(pause,(0,0))
+            if is_button_clicked(event.pos[0], event.pos[1], 240, 140, 360, 170):
+                sfx_buttuon.play()
+                if game_state == "main_menu":
+                    sfx_start.play()
+                    menu = False
+                    volume = 0.5
+                    bgsound.set_volume(volume)
+                    bgsound.play()
+                    fly = True
+                
+            if is_button_clicked(event.pos[0], event.pos[1], 240, 204, 360, 234):
+                sfx_buttuon.play()
+                if game_state == "game_over":
+                    sfx_start.play()
+                    gameover = False
+                    fly = True
+                    volume = 0.5
+                    bgsound.set_volume(volume)
+                    bgsound.play()
+                if game_state == "main_menu":
+                    pygame.quit()
+                    quit()
 
-        
-        if keys[pygame.K_SPACE] and not paused:
-            bird_y -= bird_speed
+    if fly:
+        collision = False
+
+        if keys[pygame.K_SPACE]:
+            flypaper_y -= flypaper_speed
 
         else:
-            bird_y = max(0, bird_y + bird_speed)
-        
-        bird_y = min(height - bird_size, bird_y)
-        bird_y = max(0, bird_y)
+            flypaper_y = max(0, flypaper_y + flypaper_speed)
 
-    # background
+        # Batasi agar burung tidak melewati batas layar
+        flypaper_y = min(height - flypaper_size, flypaper_y)
+        flypaper_y = max(0, flypaper_y)
+
         ground_scroll -= scroll_speed
         ground_scroll_x2 -= scroll_speed
 
@@ -278,70 +249,69 @@ while run:
         if ground_scroll_x2 < -600:
             ground_scroll_x2 = 600
 
+        pipe = halangan_height + halangan_gap
+        p1 = 350 - halangan_height
+
         screen.blit(bg,(0,0))
         screen.blit(ground,(ground_scroll, 75))
         screen.blit(ground,(ground_scroll_x2, 75))
-        screen.blit(PaperPlane,(bird_x,bird_y))
-        screen.blit(koin,(food_x, food_y))
-        pipe = pipe_height + pipe_gap
-        p1 = 350 - pipe_height
-
-        screen.blit(Halangan_pict,(pipe_x, pipe))
-        # screen.blit(Halangan_pict,(pipe_x, p1))
-        screen.blit(Halangan_pict,(pipe_x, -p1))
+        screen.blit(PaperPlane,(flypaper_x,flypaper_y))
+        screen.blit(koin,(koin_x, koin_y))
+        screen.blit(Halangan_bawah,(halangan_x, pipe))
+        screen.blit(Halangan_atas,(halangan_x, -p1))
+        
         pygame.time.wait(10)
 
-# Batasi agar burung tidak melewati batas bawah layar
-
-        food_x -= food_speed
-        if food_x < -food_size:
-            food_x = width
-            food_y = random.randint(50, height - 50)
-        # Deteksi makanan oleh burung
+        koin_x -= koin_speed
+        if koin_x < -koin_size:
+            koin_x = width
+            koin_y = random.randint(50, height - 50)
         if (
-            bird_x < food_x + food_size
-            and bird_x + bird_size > food_x
-            and bird_y < food_y + food_size
-            and bird_y + bird_size > food_y
+            flypaper_x < koin_x + koin_size
+            and flypaper_x + flypaper_size > koin_x
+            and flypaper_y < koin_y + koin_size
+            and flypaper_y + flypaper_size > koin_y
         ):
-            jump_s.play()
-            # Burung memakan makanan
-            food_x = width + 100  # Geser makanan ke luar layar
-            food_y = random.randint(50, height - 50)
-            isi_nyawa += 25  # Tambahkan skor
-            score += 3
+            coins_s.play()
+            koin_x = width + 100
+            koin_y = random.randint(50, height - 50)
+            isi_nyawa += 25 
+            score += 1
             if score % 10 == 0:
-                bird_speed += 2
-                pipe_speed += 2
+                flypaper_speed += 1
+                halangan_speed += 1
                 
             if isi_nyawa == 100:
                 lives += 1
                 isi_nyawa = 0 
-                bird_speed += 1
-                pipe_speed += 1
+                flypaper_speed += 1
+                halangan_speed += 1
 
-        pipe_x -= pipe_speed
-        if pipe_x < -pipe_width:
-            pipe_x = width
-            pipe_height = random.randint(50, height - 100)  
+        halangan_x -= halangan_speed
+        if halangan_x < -halangan_width:
+            halangan_x = width
+            halangan_height = random.randint(50, height - 100)  
             score += 1
             if score % 10 == 0:
-                bird_speed += 2
-                pipe_speed += 2
+                flypaper_speed += 2
+                halangan_speed += 2
 
         # Deteksi tabrakan dengan pipa
-        if bird_x < pipe_x + pipe_width and bird_x + bird_size > pipe_x:
-            if bird_y < pipe_height or bird_y + bird_size > pipe_height + pipe_gap:
-                if bird_speed - 2 <= 3 and pipe_speed - 2 <= 3:
-                    bird_speed = 3
-                    pipe_speed = 3
+        if flypaper_x < halangan_x + halangan_width and flypaper_x + flypaper_size > halangan_x:
+            if flypaper_y < halangan_height or flypaper_y + flypaper_size > halangan_height + halangan_gap:
+                sfx_crash.play()
+                if flypaper_speed - 2 <= 3 and halangan_speed - 2 <= 3:
+                    flypaper_speed = 4
+                    halangan_speed = 4
                 else:
-                    bird_speed -= 2
-                    pipe_speed -= 2
+                    flypaper_speed -= 2
+                    halangan_speed -= 2
                 lives -= 1
                 if lives == 0:
+                    bgsound.stop()
                     print(f"Game Over. Skor Anda: {score}")
                     fly = False
+                    gameover = True
                     game_over()
 
                 resetgame()
@@ -351,16 +321,15 @@ while run:
     if fly == True:
         draw_text(f"Skor    : {score}", 10, 10)
         draw_text(f"Nyawa : {lives}", 10, 30)
-        draw_text(f"Speed : {bird_speed}", 10, 50)
+        # draw_text(f"Speed : {flypaper_speed}", 10, 50)
 
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, glGenTextures(1))
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pygame.image.tostring(pygame.display.get_surface(), 'RGBA'))
-    # draw_ground()
     draw_background()
-
     # draw_pipe()
+    # draw_bird()
     glDisable(GL_TEXTURE_2D)
 
     pygame.display.flip()
