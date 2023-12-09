@@ -321,15 +321,12 @@ while run:
     if fly == True:
         draw_text(f"Skor    : {score}", 10, 10)
         draw_text(f"Nyawa : {lives}", 10, 30)
-        # draw_text(f"Speed : {flypaper_speed}", 10, 50)
 
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, glGenTextures(1))
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pygame.image.tostring(pygame.display.get_surface(), 'RGBA'))
     draw_background()
-    # draw_pipe()
-    # draw_bird()
     glDisable(GL_TEXTURE_2D)
 
     pygame.display.flip()
