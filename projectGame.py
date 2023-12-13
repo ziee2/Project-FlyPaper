@@ -11,7 +11,7 @@ width, height = 600, 400
 pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)
 screen = pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)
 pygame.display.set_caption("FlyPaper")
-glOrtho(0, width, height, 0, -1, 1)  
+glOrtho(0, width, height, 0, -1, 1)
 
 #sound
 bgsound = pygame.mixer.Sound("E:/NgodinG/Python/kuliah/semes3/grafkom/Project_Flypaper/sound/Intrumen Kebunbinatang.mp3")
@@ -293,8 +293,8 @@ while run:
             halangan_height = random.randint(50, height - 100)  
             score += 1
             if score % 10 == 0:
-                flypaper_speed += 2
-                halangan_speed += 2
+                flypaper_speed += 1
+                halangan_speed += 1
 
         if flypaper_x < halangan_x + halangan_width and flypaper_x + flypaper_size > halangan_x:
             if flypaper_y < halangan_height or flypaper_y + flypaper_size > halangan_height + halangan_gap:
@@ -329,6 +329,7 @@ while run:
     draw_background()
     # draw_halangan()
     # draw_flypaper()
+    # button_MM()
     glDisable(GL_TEXTURE_2D)
 
     pygame.display.flip()
